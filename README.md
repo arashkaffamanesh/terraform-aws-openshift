@@ -10,6 +10,11 @@ The issue has been reported here:
 
 https://github.com/dwmkerr/terraform-aws-openshift/issues/64
 
+## TL;DR
+
+$ make infrastructure
+$ make openshift
+$ make openshift
 
 [![CircleCI](https://circleci.com/gh/dwmkerr/terraform-aws-openshift.svg?style=shield)](https://circleci.com/gh/dwmkerr/terraform-aws-openshift)
 

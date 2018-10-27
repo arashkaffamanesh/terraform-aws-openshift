@@ -3,6 +3,7 @@
 terraform.tfvars
 terraform.tfstate
 terraform.tfstate.backup
+kube.config
 
 # The generated inventory file.
 inventory.cfg

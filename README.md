@@ -1,19 +1,10 @@
 # terraform-aws-openshift
 
-## OKD 3.10 support added
+[![CircleCI](https://circleci.com/gh/dwmkerr/terraform-aws-openshift.svg?style=shield)](https://circleci.com/gh/dwmkerr/terraform-aws-openshift)
 
-I needed to adapt the inventory.template.cfg, install-from-bastion-sh to be able to deploy OKD 3.10.
+This project shows you how to set up OpenShift on AWS using Terraform. This the companion project to my article [Get up and running with OpenShift on AWS](http://www.dwmkerr.com/get-up-and-running-with-openshift-on-aws/).
 
-Note: you need to run "make openshift" a second time to get a somehow working installation.
-
-The issue has been reported here:
-
-https://github.com/dwmkerr/terraform-aws-openshift/issues/64
-
-
-This project shows you how to set up OpenShift Origin on AWS using Terraform. This the companion project to my article [Get up and running with OpenShift on AWS](http://www.dwmkerr.com/get-up-and-running-with-openshift-on-aws/).
-
-![OpenShift Sample Project](./docs/origin_3.9_screenshot.png)
+![OpenShift Sample Project](./docs/okd_3.10_screenshot.png)
 
 I am also adding some 'recipes' which you can use to mix in more advanced features:
 
@@ -142,10 +133,10 @@ The url will be something like `https://a.b.c.d.xip.io:8443`.
 
 ### The Master Node
 
-The master node has the OpenShift client installed and is authenticated as a cluter administrator. If you SSH onto the master node via the bastion, then you can use the OpenShift client and have full access to all projects:
+The master node has the OpenShift client installed and is authenticated as a cluster administrator. If you SSH onto the master node via the bastion, then you can use the OpenShift client and have full access to all projects:
 
 ```
-$ make ssh-master # or if you prefer: ssh -t -A ec2-user@$(terraform output bastion-public_dns) ssh master.openshift.local
+$ make ssh-master # or if you prefer: ssh -t -A ec2-user@$(terraform output bastion-public_ip) ssh master.openshift.local
 $ oc get pods
 NAME                       READY     STATUS    RESTARTS   AGE
 docker-registry-1-d9734    1/1       Running   0          2h
@@ -189,7 +180,7 @@ Now check the address of the Docker Registry. Your Docker Registry url is just y
 https://54.85.76.73.xip.io:8443
 ```
 
-In the example above, my registry url is `https://docker-registry-default.54.85.76.73.xip.io:8443`. You can also get this url by running `oc get routes -n default` on the master node.
+In the example above, my registry url is `https://docker-registry-default.54.85.76.73.xip.io`. You can also get this url by running `oc get routes -n default` on the master node.
 
 You will need to add this registry to the list of untrusted registries. The documentation for how to do this here https://docs.docker.com/registry/insecure/. On a Mac, the easiest way to do this is open the Docker Preferences, go to 'Daemon' and add the address to the list of insecure regsitries:
 
@@ -228,25 +219,26 @@ When you run `make openshift`, all that happens is the `inventory.template.cfg` 
 
 ## Choosing the OpenShift Version
 
-Currently, OpenShift 3.9 is installed.
+Currently, OKD 3.10 is installed.
 
-To change the version, just update the version identifier in this line of the [`./install-from-bastion.sh`](./install-from-bastion.sh) script:
+To change the version, you can attempt to update the version identifier in this line of the [`./install-from-bastion.sh`](./install-from-bastion.sh) script:
 
 ```bash
-git clone -b release-3.9 https://github.com/openshift/openshift-ansible
+git clone -b release-3.10 https://github.com/openshift/openshift-ansible
 ```
 
-Available versions are listed [here](https://github.com/openshift/openshift-ansible#getting-the-correct-version).
+However, this may not work if the version you change to requires a different setup. To allow people to install earlier versions, stable branches are available. Available versions are listed [here](https://github.com/openshift/openshift-ansible#getting-the-correct-version).
 
 
-| Version | Status |
-|---------|--------|
-| 3.9     | Tested successfully |
-| 3.7     | [Work in progress](https://github.com/dwmkerr/terraform-aws-openshift/pull/43) |
-| 3.6     | Tested successfully |
-| 3.5     | Tested successfully |
+| Version | Status              | Branch                                                                                         |
+|---------|---------------------|------------------------------------------------------------------------------------------------|
+| 3.10    | Tested successfully | [`release/okd-3.10`](https://github.com/dwmkerr/terraform-aws-openshift/tree/release/okd-3.10) |
+| 3.9     | Tested successfully | [`release/ocp-3.9`](https://github.com/dwmkerr/terraform-aws-openshift/tree/release/ocp-3.9)   |
+| 3.8     | Untested |                                                                                                |
+| 3.7     | Untested |                                                                                                |
+| 3.6     | Tested successfully | [`release/openshift-3.6`](tree/release/openshift-3.6) |
+| 3.5     | Tested successfully | [`release/openshift-3.5`](tree/release/openshift-3.5) |
 
-OpenShift 3.5 is fully tested, and has a slightly different setup. You can build 3.5 by checking out the [`release/openshift-3.5`](https://github.com/dwmkerr/terraform-aws-openshift/tree/release/openshift-3.5) branch.
 
 ## Destroying the Cluster
 
@@ -317,7 +309,7 @@ source="/var/log/containers/counter-1-*"  | rex field=source "\/var\/log\/contai
 Ugh, stupid OpenShift docker version vs registry version issue. There's a workaround. First, ssh onto the master:
 
 ```
-$ ssh -A ec2-user@$(terraform output bastion-public_dns)
+$ ssh -A ec2-user@$(terraform output bastion-public_ip)
 
 $ ssh master.openshift.local
 ```
